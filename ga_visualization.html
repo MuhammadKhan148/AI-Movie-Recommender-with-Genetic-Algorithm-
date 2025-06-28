@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>GA Evolution Monitor</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .monitor-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="monitor-container">
+        <h2>Genetic Algorithm Evolution Monitor</h2>
+        <div class="chart-container">
+            <canvas id="gaChart"></canvas>
+        </div>
+        <div id="metrics"></div>
+    </div>
+
+    <script>
+        let fitnessData = [];
+        let generationLabels = [];
+
+        // Initialize chart
+        const ctx = document.getElementById('gaChart').getContext('2d');
+        const gaChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: generationLabels,
+                datasets: [{
+                    label: 'Best Fitness',
+                    data: fitnessData,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Fetch stats from your existing API
+        function updateChart() {
+            fetch('http://localhost:8000/stats')
+                .then(response => response.json())
+                .then(data => {
+                    const stats = data.ga_stats;
+
+                    // Update chart data
+                    if (!generationLabels.includes(stats.generation)) {
+                        generationLabels.push(stats.generation);
+                        fitnessData.push(stats.best_fitness);
+
+                        // Only keep last 20 data points
+                        if (generationLabels.length > 20) {
+                            generationLabels.shift();
+                            fitnessData.shift();
+                        }
+
+                        gaChart.update();
+                    }
+
+                    // Update metrics display
+                    document.getElementById('metrics').innerHTML = `
+                        <p><strong>Generation:</strong> ${stats.generation}</p>
+                        <p><strong>Best Fitness:</strong> ${stats.best_fitness.toFixed(2)}</p>
+                        <p><strong>Average Fitness:</strong> ${stats.average_fitness.toFixed(2)}</p>
+                        <p><strong>Mutation Rate:</strong> ${stats.mutation_rate}</p>
+                    `;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Update every 3 seconds
+        setInterval(updateChart, 3000);
+        updateChart(); // Initial update
+    </script>
+</body>
+
+</html>

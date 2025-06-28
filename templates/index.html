@@ -1,8 +1,8 @@
-
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>AI Movie Recommender</title>
+    <title>Applied AI Project: Emotion-Driven Movie Recommender</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,31 +11,49 @@
             padding: 20px;
             background-color: #f5f5f5;
         }
-        header {
-            background-color: #4a4e69;
+
+        .header {
+            background-color: #3498db;
             color: white;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
+            text-align: center;
         }
+
+        .project-badge {
+            background-color: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
         .container {
             display: flex;
             gap: 20px;
         }
+
         .chat-container {
             flex: 2;
             background-color: white;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+
         .info-container {
             flex: 1;
             background-color: white;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            max-height: 800px;
         }
+
         .messages {
             height: 400px;
             overflow-y: auto;
@@ -44,28 +62,33 @@
             border-radius: 8px;
             margin-bottom: 10px;
         }
+
         .user-message {
             background-color: #e2f0cb;
             padding: 10px;
             border-radius: 8px;
             margin-bottom: 10px;
         }
+
         .bot-message {
             background-color: #b5c9ff;
             padding: 10px;
             border-radius: 8px;
             margin-bottom: 10px;
         }
+
         .input-container {
             display: flex;
             gap: 10px;
         }
+
         input {
             flex: 1;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 8px;
         }
+
         button {
             background-color: #4a4e69;
             color: white;
@@ -74,145 +97,371 @@
             border-radius: 8px;
             cursor: pointer;
         }
+
         .movie-recommendation {
             background-color: #ffd6ba;
             padding: 15px;
             border-radius: 8px;
             margin-top: 10px;
         }
+
         .emotion-display {
             background-color: #f4f1de;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
         }
+
         .progress-bar {
             background-color: #ddd;
             border-radius: 5px;
             height: 10px;
             margin-top: 5px;
         }
+
         .progress-fill {
             background-color: #9c89b8;
             height: 100%;
             border-radius: 5px;
             width: 0%;
         }
+
         .ga-stats {
             background-color: #f4f1de;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
         }
+
         .stats-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
         }
+
         .stats-item {
             text-align: center;
             flex: 1;
         }
+
         .stats-value {
             font-size: 20px;
             font-weight: bold;
         }
+
         .conversation-path {
             background-color: #f4f1de;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 15px;
         }
+
         footer {
             text-align: center;
             margin-top: 20px;
             color: #666;
         }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            background-color: #f8f8f8;
+            margin-right: 5px;
+        }
+
+        .tab.active {
+            background-color: white;
+            border-color: #ddd;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .ai-techniques {
+            margin-top: 20px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .technique {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-left: 3px solid #3498db;
+            background-color: #f9f9f9;
+        }
+
+        .technique-name {
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .ai-visualization {
+            border: 2px solid #e74c3c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            background-color: #fff9f9;
+        }
+
+        .ai-title {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .debug-value {
+            font-family: monospace;
+            background-color: #f1f1f1;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+
+        .ga-step {
+            background-color: #f8e5e5;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .keyword {
+            background-color: #e8f4f8;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .assignment-proof {
+            background-color: #ffe9e9;
+            border: 2px dashed #e74c3c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .highlight {
+            background-color: #fffacd;
+            padding: 2px 4px;
+            font-weight: bold;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #4a4e69;
+            margin-top: 20px;
+            border-bottom: 2px solid #4a4e69;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            color: #3498db;
+            margin-top: 15px;
+        }
     </style>
 </head>
+
 <body>
-    <header>
-        <h1>Movie Recommender with AI</h1>
-        <p>Demonstrating Genetic Algorithms & Emotion Analysis</p>
-    </header>
-    
+    <div class="header">
+        <div class="project-badge">Applied AI Course Project</div>
+        <h1>Emotion-Driven Movie Recommender</h1>
+        <p>Using <strong>MovieLens Data</strong> with <strong>Genetic Algorithms</strong> & <strong>Emotion
+                Analysis</strong></p>
+    </div>
+
     <div class="container">
         <div class="chat-container">
-            <h2>Chat Interface</h2>
+            <h2>Interactive Chatbot Demo</h2>
             <div class="messages" id="messages"></div>
             <div class="input-container">
                 <input type="text" id="message-input" placeholder="Type your message here...">
                 <button onclick="sendMessage()">Send</button>
             </div>
         </div>
-        
+
         <div class="info-container">
-            <h2>AI Techniques</h2>
-            
-            <h3>Current Emotion</h3>
-            <div class="emotion-display" id="emotion-display">
-                <p>No emotion detected yet</p>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="emotion-progress" style="width: 0%"></div>
+            <div class="tabs">
+                <div class="tab active" onclick="showTab('ai-techniques')">AI Techniques</div>
+                <div class="tab" onclick="showTab('visualization')">Live Visualization</div>
+                <div class="tab" onclick="showTab('project-info')">Project Requirements</div>
+                <div class="tab" onclick="showTab('movielens')">MovieLens Integration</div>
+            </div>
+
+            <div id="ai-techniques" class="tab-content active">
+                <h2>AI Techniques Implemented</h2>
+
+                <div class="technique">
+                    <div class="technique-name">1. Genetic Algorithm Optimization</div>
+                    <p>An evolutionary algorithm that optimizes conversation paths:</p>
+                    <ul>
+                        <li><strong>Population:</strong> Different conversation strategies</li>
+                        <li><strong>Selection:</strong> Choosing successful strategies</li>
+                        <li><strong>Crossover:</strong> Combining successful traits</li>
+                        <li><strong>Mutation:</strong> Introducing variations</li>
+                        <li><strong>Fitness Function:</strong> User satisfaction scores</li>
+                    </ul>
+                </div>
+
+                <div class="technique">
+                    <div class="technique-name">2. Emotion Analysis</div>
+                    <p>Natural language processing to detect emotions in text:</p>
+                    <ul>
+                        <li><strong>Joy:</strong> happiness, excitement, love</li>
+                        <li><strong>Sadness:</strong> melancholy, depression</li>
+                        <li><strong>Anger:</strong> frustration, irritation</li>
+                        <li><strong>Fear:</strong> anxiety, nervousness</li>
+                        <li><strong>Surprise:</strong> amazement, shock</li>
+                    </ul>
+                </div>
+
+                <h3>Emotion-to-Genre Mapping</h3>
+                <p>The system maps detected emotions to appropriate movie genres:</p>
+                <ul>
+                    <li><strong>Joy:</strong> Comedy, Animation, Musical</li>
+                    <li><strong>Sadness:</strong> Drama, Romance</li>
+                    <li><strong>Anger:</strong> Action, Thriller</li>
+                    <li><strong>Fear:</strong> Comedy, Animation, Fantasy</li>
+                    <li><strong>Surprise:</strong> Mystery, Sci-Fi, Fantasy</li>
+                </ul>
+            </div>
+
+            <div id="visualization" class="tab-content">
+                <h2>Live Algorithm Visualization</h2>
+
+                <h3>Current Emotion</h3>
+                <div class="emotion-display" id="emotion-display">
+                    <p>No emotion detected yet</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="emotion-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <h3>Genetic Algorithm Stats</h3>
+                <div class="ga-stats" id="ga-stats">
+                    <div class="stats-row">
+                        <div class="stats-item">
+                            <div class="stats-label">Generation</div>
+                            <div class="stats-value" id="generation">0</div>
+                        </div>
+                        <div class="stats-item">
+                            <div class="stats-label">Best Fitness</div>
+                            <div class="stats-value" id="best-fitness">0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Optimized Conversation Path</h3>
+                <div class="conversation-path" id="conversation-path">
+                    <p>No path data yet</p>
+                </div>
+
+                <div class="ai-visualization">
+                    <div class="ai-title">🧠 AI Processing Visualization</div>
+                    <p>Current conversation stage: <span class="debug-value" id="current-stage">greeting</span></p>
+                    <p>Detected emotion: <span class="debug-value" id="detected-emotion">neutral</span> (confidence:
+                        <span id="emotion-confidence-value">0.0</span>)
+                    </p>
+                    <p>User preferences detected: <span class="debug-value" id="user-preferences">none</span></p>
+                    <p>Genetic algorithm action: <span class="debug-value" id="ga-action">initializing</span></p>
                 </div>
             </div>
-            
-            <h3>Genetic Algorithm Stats</h3>
-            <div class="ga-stats" id="ga-stats">
-                <div class="stats-row">
-                    <div class="stats-item">
-                        <div class="stats-label">Generation</div>
-                        <div class="stats-value" id="generation">0</div>
-                    </div>
-                    <div class="stats-item">
-                        <div class="stats-label">Best Fitness</div>
-                        <div class="stats-value" id="best-fitness">0.00</div>
-                    </div>
+
+            <div id="project-info" class="tab-content">
+                <h2>Applied AI Course Project Requirements</h2>
+
+                <div class="assignment-proof">
+                    <h3>✅ Project Requirements Met</h3>
+                    <p>This project successfully implements <span class="highlight">multiple AI techniques</span> as
+                        required:</p>
+                    <ul>
+                        <li><strong>Genetic Algorithms (Optimization):</strong> Evolving optimal conversation paths</li>
+                        <li><strong>Emotion/Sentiment Analysis:</strong> Text-based emotion detection</li>
+                    </ul>
+                    <p>The integration of these techniques creates an intelligent recommendation system that:</p>
+                    <ul>
+                        <li>Learns from user interactions (Genetic Algorithm)</li>
+                        <li>Personalizes recommendations based on emotional context</li>
+                        <li>Dynamically optimizes the conversation flow</li>
+                    </ul>
+                    <p><strong>Optional ML Enhancement:</strong> ML-based emotion detection can be activated for
+                        advanced capabilities</p>
                 </div>
+
+                <h3>Project Information</h3>
+                <p><strong>Title:</strong> Emotion-Driven Movie Recommender with Genetic Algorithm Optimization</p>
+                <p><strong>Authors:</strong> Muhammad Khan(22i-2604),Akash Ijaz(22i-2606), Arslan Asad(22i-2654)</p>
+                <p><strong>Course:</strong> Applied AI</p>
+                <p><strong>Date:</strong> May 2025</p>
+
+                <h3>Technical Implementation</h3>
+                <p>The project consists of three main components:</p>
+                <ol>
+                    <li><strong>Genetic Algorithm:</strong> Optimizes conversation paths through selection, crossover,
+                        and mutation</li>
+                    <li><strong>Emotion Analyzer:</strong> Detects emotions from text input using NLP techniques</li>
+                    <li><strong>Recommendation Engine:</strong> Maps emotions to appropriate movie genres</li>
+                </ol>
             </div>
-            
-            <h3>Optimized Conversation Path</h3>
-            <div class="conversation-path" id="conversation-path">
-                <p>No path data yet</p>
+
+            <div id="movielens" class="tab-content">
+                <h3>MovieLens Integration</h3>
+                <ul>
+                    <li>Real movie database with 20M ratings</li>
+                    <li>Dynamic genre-based recommendations</li>
+                    <li>Emotion-to-genre mapping</li>
+                </ul>
             </div>
-            
-            <h3>Emotion-to-Genre Mapping</h3>
-            <ul>
-                <li><strong>Joy</strong>: Comedy, Animation, Musical</li>
-                <li><strong>Sadness</strong>: Drama, Romance</li>
-                <li><strong>Anger</strong>: Action, Thriller</li>
-                <li><strong>Fear</strong>: Comedy, Animation, Fantasy</li>
-                <li><strong>Surprise</strong>: Mystery, Sci-Fi, Fantasy</li>
-                <li><strong>Neutral</strong>: Documentary, Biography, Drama</li>
-            </ul>
         </div>
     </div>
-    
+
     <footer>
-        Final Project for Applied AI Course | Emotion-Driven Movie Recommender with Genetic Algorithm Optimization
+        Enhanced Movie Recommender with MovieLens Data Integration - Applied AI Course Project
     </footer>
-    
+
     <script>
-        // Variables to store session data
         const userId = 'user_' + Math.random().toString(36).substr(2, 9);
         let currentEmotion = 'neutral';
         let confidence = 0.0;
-        
-        // Function to send message to backend
+
         function sendMessage() {
             const input = document.getElementById('message-input');
             const message = input.value.trim();
-            
+
             if (!message) return;
-            
-            // Add user message to chat
+
             addMessage('user', message);
             input.value = '';
-            
-            // Show loading indicator
+
             addMessage('bot', 'Thinking...');
-            
-            // Send message to API
+
             fetch('http://localhost:8000/chat', {
                 method: 'POST',
                 headers: {
@@ -223,80 +472,79 @@
                     message: message
                 }),
             })
-            .then(response => response.json())
-            .then(data => {
-                // Remove loading indicator
-                const messages = document.getElementById('messages');
-                messages.removeChild(messages.lastChild);
-                
-                // Add bot response
-                addMessage('bot', data.reply);
-                
-                // Update emotion
-                currentEmotion = data.emotion;
-                confidence = data.confidence;
-                updateEmotionDisplay();
-                
-                // Add movie recommendations if any
-                if (data.movies && data.movies.length > 0) {
-                    addMovieRecommendation(data.movies[0], data.emotion);
-                }
-                
-                // Fetch updated stats
-                fetchStats();
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                // Remove loading indicator
-                const messages = document.getElementById('messages');
-                messages.removeChild(messages.lastChild);
-                
-                // Add error message
-                addMessage('bot', 'Sorry, there was an error processing your request. Make sure the backend server is running.');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    const messages = document.getElementById('messages');
+                    messages.removeChild(messages.lastChild);
+
+                    addMessage('bot', data.reply);
+
+                    currentEmotion = data.emotion;
+                    confidence = data.confidence;
+                    updateEmotionDisplay();
+
+                    if (data.movies && data.movies.length > 0) {
+                        addMovieRecommendation(data.movies[0], data.emotion);
+                    }
+
+                    // Update AI visualization with debug info
+                    updateAIVisualization(
+                        data.debug_info?.stage || "processing",
+                        data.emotion,
+                        data.confidence,
+                        data.debug_info?.genres || [],
+                        data.debug_info?.preferences || []
+                    );
+
+                    fetchStats();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const messages = document.getElementById('messages');
+                    messages.removeChild(messages.lastChild);
+                    addMessage('bot', 'Sorry, there was an error. Please check that the backend server is running.');
+                });
         }
-        
-        // Function to add message to chat
+
         function addMessage(role, content) {
             const messages = document.getElementById('messages');
             const messageElement = document.createElement('div');
             messageElement.className = role === 'user' ? 'user-message' : 'bot-message';
-            
+
             if (role === 'user') {
                 messageElement.innerHTML = `<strong>You:</strong> ${content}`;
             } else {
                 messageElement.innerHTML = `<strong>Bot:</strong> ${content}`;
             }
-            
+
             messages.appendChild(messageElement);
             messages.scrollTop = messages.scrollHeight;
         }
-        
-        // Function to add movie recommendation
+
         function addMovieRecommendation(movie, emotion) {
             const messages = document.getElementById('messages');
             const recommendationElement = document.createElement('div');
             recommendationElement.className = 'movie-recommendation';
-            
+
             recommendationElement.innerHTML = `
-                <strong>RECOMMENDATION BASED ON AI TECHNIQUES:</strong>
-                <h3>${movie.title} (${movie.genre})</h3>
+                <strong>MOVIE RECOMMENDATION:</strong>
+                <h3>${movie.title}</h3>
+                <p><strong>Genre:</strong> ${movie.genre}</p>
                 <p>${movie.description}</p>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: ${movie.score * 100}%"></div>
                 </div>
-                <p><em>Recommendation influenced by detected emotion: ${emotion}</em></p>
+                <p><em>Based on your ${emotion} mood</em></p>
             `;
-            
+
             messages.appendChild(recommendationElement);
             messages.scrollTop = messages.scrollHeight;
         }
-        
-        // Function to update emotion display
+
         function updateEmotionDisplay() {
             const emotionDisplay = document.getElementById('emotion-display');
             const emotionProgress = document.getElementById('emotion-progress');
-            
+
             const emotionEmojis = {
                 'joy': '😊',
                 'sadness': '😢',
@@ -305,52 +553,89 @@
                 'surprise': '😲',
                 'neutral': '😐'
             };
-            
+
             const emoji = emotionEmojis[currentEmotion] || '😐';
-            
+
             emotionDisplay.innerHTML = `
                 <p>${emoji} <strong>${currentEmotion.toUpperCase()}</strong> (${confidence.toFixed(2)})</p>
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: ${confidence * 100}%"></div>
                 </div>
             `;
+
+            // Update visualization tab
+            document.getElementById('emotion-confidence-value').textContent = confidence.toFixed(2);
+            document.getElementById('detected-emotion').textContent = currentEmotion;
         }
-        
-        // Function to fetch stats
+
+        function updateAIVisualization(stage, emotion, confidence, genres, preferences) {
+            document.getElementById('current-stage').textContent = stage;
+            document.getElementById('detected-emotion').textContent = emotion;
+            document.getElementById('emotion-confidence-value').textContent = confidence.toFixed(2);
+
+            // Update user preferences display
+            let preferencesText = [];
+            if (genres && genres.length > 0) {
+                preferencesText.push(`Genres: ${genres.join(', ')}`);
+            }
+            document.getElementById('user-preferences').textContent =
+                preferencesText.length > 0 ? preferencesText.join('; ') : 'none';
+        }
+
         function fetchStats() {
             fetch('http://localhost:8000/stats')
-            .then(response => response.json())
-            .then(data => {
-                // Update GA stats
-                if (data.ga_stats) {
-                    document.getElementById('generation').textContent = data.ga_stats.generation;
-                    document.getElementById('best-fitness').textContent = data.ga_stats.best_fitness.toFixed(2);
-                    
-                    // Update conversation path
-                    const pathElement = document.getElementById('conversation-path');
-                    if (data.ga_stats.best_path && data.ga_stats.best_path.length > 0) {
-                        const formattedPath = data.ga_stats.best_path
-                            .map(stage => stage.replace(/_/g, ' ').replace(/\\b\\w/g, l => l.toUpperCase()))
-                            .join(' → ');
-                        
-                        pathElement.innerHTML = `<p>${formattedPath}</p>`;
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ga_stats) {
+                        document.getElementById('generation').textContent = data.ga_stats.generation;
+                        document.getElementById('best-fitness').textContent = data.ga_stats.best_fitness.toFixed(2);
+
+                        const pathElement = document.getElementById('conversation-path');
+                        if (data.ga_stats.best_path && data.ga_stats.best_path.length > 0) {
+                            const formattedPath = data.ga_stats.best_path
+                                .map(stage => stage.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))
+                                .join(' → ');
+
+                            pathElement.innerHTML = `<p>${formattedPath}</p>`;
+                        }
                     }
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching stats:', error);
-            });
+                })
+                .catch(error => {
+                    console.error('Error fetching stats:', error);
+                });
         }
-        
-        // Handle Enter key in input field
-        document.getElementById('message-input').addEventListener('keypress', function(event) {
+
+        function showTab(tabId) {
+            // Hide all tab contents
+            const tabContents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove('active');
+            }
+
+            // Deactivate all tabs
+            const tabs = document.getElementsByClassName('tab');
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+
+            // Show selected tab content
+            document.getElementById(tabId).classList.add('active');
+
+            // Activate selected tab
+            const selectedTab = [...document.getElementsByClassName('tab')].find(tab =>
+                tab.getAttribute('onclick').includes(tabId)
+            );
+            selectedTab.classList.add('active');
+        }
+
+        document.getElementById('message-input').addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
                 sendMessage();
             }
         });
-        
-        // Fetch initial stats
+
         fetchStats();
     </script>
 </body>
+
 </html>

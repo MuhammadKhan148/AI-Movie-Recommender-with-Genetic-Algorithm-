@@ -16,6 +16,14 @@ import re
 import numpy as np
 from typing import Dict, List, Any, Tuple, Optional
 
+try:
+    from ml_emotion_detector import MLEmotionDetectorOptional
+    USE_ML_EMOTIONS = True
+    print("ML emotion detection available")
+except ImportError:
+    USE_ML_EMOTIONS = False
+    print("Using simple keyword-based emotion detection")
+
 # ======================================================
 # Genetic Algorithm for Conversation Path Optimization
 # ======================================================
@@ -256,6 +264,11 @@ class EmotionDrivenConversationManager:
     """
     
     def __init__(self):
+        if USE_ML_EMOTIONS:
+            self.emotion_detector = MLEmotionDetectorOptional()  # Use ML if available
+        else:
+            self.emotion_detector = EmotionDetector()  # Keep your original
+        
         # Initialize genetic algorithm for conversation optimization
         self.ga = GeneticAlgorithm()
         
@@ -319,8 +332,8 @@ class EmotionDrivenConversationManager:
                 'secondary': ['Adventure', 'Family', 'Fantasy']
             },
             'sadness': {
-                'primary': ['Drama', 'Romance'],
-                'secondary': ['Music', 'Biography', 'War']
+                'primary': ['Comedy', 'Animation', 'Adventure'],  # Changed to provide escape
+                'secondary': ['Action', 'Fantasy', 'Sci-Fi']     # Genres that help you escape reality
             },
             'anger': {
                 'primary': ['Action', 'Thriller'],
@@ -436,6 +449,11 @@ class EmotionDrivenConversationManager:
         else:
             # Fallback to recommendation if index out of bounds
             current_stage = "recommendation"
+        
+        # Skip genre preference if we already have genres
+        if current_stage == "genre_preference" and state["genres"]:
+            state["current_stage_index"] += 1
+            current_stage = state["path"][state["current_stage_index"]]
         
         # Check for explicit genre mentions
         extracted_genres = self._extract_genres(message_lower)
@@ -599,7 +617,7 @@ class EmotionDrivenConversationManager:
             }
     
     def _extract_genres(self, message: str) -> List[str]:
-        """Extract movie genres mentioned in message"""
+        """Extract movie genres mentioned in message with improved detection"""
         genres = []
         common_genres = [
             "action", "adventure", "comedy", "drama", "horror", 
@@ -608,21 +626,23 @@ class EmotionDrivenConversationManager:
             "superhero", "history", "war"
         ]
         
-        # Check for exact genre matches
+        # Check for capitalized genres
+        message_words = message.split()
+        for word in message_words:
+            if word.title() in ["Action", "Comedy", "Drama"]:
+                if word.lower() not in genres:
+                    genres.append(word.lower())
+        
+        # Also check for genres in lowercase within the message
         for genre in common_genres:
-            if genre in message.split() or f"{genre}." in message or f"{genre}," in message:
+            if genre in message.lower() and genre not in genres:
                 genres.append(genre)
         
-        # Handle special cases where the user might just say a genre name directly
-        if message.strip() in common_genres:
-            if message.strip() not in genres:
-                genres.append(message.strip())
-                
-        # Handle multi-word genres like "sci-fi" that might be written as "sci fi"
-        if "sci fi" in message or "science fiction" in message:
+        # Handle special cases like "sci-fi"
+        if "sci fi" in message.lower() or "science fiction" in message.lower():
             if "sci-fi" not in genres:
                 genres.append("sci-fi")
-                
+        
         return genres
     
     def _extract_movie_mentions(self, message: str) -> List[str]:
@@ -653,21 +673,27 @@ class EmotionDrivenConversationManager:
         emotion = state["detected_emotion"] or "neutral"
         genres = state["genres"]
         
-        # If we have both emotion and genres, use emotion-to-genre mapping
-        if emotion in self.emotion_genre_mapping and not genres:
-            # Get primary genres for this emotion
-            primary_genres = [g.lower() for g in self.emotion_genre_mapping[emotion]["primary"]]
-            genres = primary_genres
-        
-        # Generate recommendation from database
+        # Use the last mentioned genre
         if genres:
-            genre = genres[0]
-            movie = self.movie_database.get_movie_by_genre(genre, state["recommended_movies"])
-            return movie["title"], genre, movie["description"]
+            genre = genres[-1]  # Take the most recent genre
+            movie = self.movie_database.get_movie_by_genre_and_emotion(genre, emotion, state["recommended_movies"])
+            return movie["title"], genre.title(), movie["description"]
         
-        # If no genres, use emotion-based recommendation
+        # If no explicit genres mentioned, use emotion-to-genre mapping
+        if emotion in self.emotion_genre_mapping:
+            primary_genres = [g.lower() for g in self.emotion_genre_mapping[emotion]["primary"]]
+            genre = primary_genres[0] if primary_genres else "comedy"
+            movie = self.movie_database.get_movie_by_genre_and_emotion(genre, emotion, state["recommended_movies"])
+            return movie["title"], genre.title(), movie["description"]
+        
+        # Fallback
         movie = self.movie_database.get_movie_by_emotion(emotion, state["recommended_movies"])
-        return movie["title"], movie["genre"], movie["description"]
+        
+        # Use actual detected emotion in response
+        detected_emotion = state["detected_emotion"] or "neutral"
+        response = movie["description"].replace("[EMOTION]", detected_emotion)
+        
+        return movie["title"], movie["genre"].title(), response
     
     def _get_emotion_adjective(self, emotion: str) -> str:
         """Convert emotion to descriptive adjective"""
@@ -708,7 +734,7 @@ class EmotionDrivenConversationManager:
             message = message[:1000] + "..."
             
         # Get emotion from message
-        emotion, confidence = EmotionDetector.predict(message)
+        emotion, confidence = self.emotion_detector.predict(message)
         
         # Get next question
         response_data = self.get_next_question(user_id, emotion, confidence, message)
@@ -763,14 +789,21 @@ class EmotionDetector:
     
     @staticmethod
     def predict(text: str) -> Tuple[str, float]:
-        """Predict emotion from text"""
+        """Predict emotion from text with improved negative emotion detection"""
         text = text.lower()
         
-        # Simple keyword matching for demo
-        if any(word in text for word in ["happy", "good", "great", "joy", "wonderful", "excited", "love"]):
+        # Add these FIRST in your keyword checks
+        if any(word in text for word in ["not good", "not very good", "depressed", "depression"]):
+            return "sadness", 0.8
+        
+        # Check for explicit negative emotions first
+        if any(word in text for word in ["sad", "down", "upset", "miserable", "unhappy"]):
+            return "sadness", 0.8
+        elif any(word in text for word in ["escape", "get away", "distract", "forget"]):
+            # "escape" indicates someone wants to avoid their current mood
+            return "sadness", 0.7  # They want to escape sadness
+        elif any(word in text for word in ["happy", "good", "great", "joy", "wonderful", "excited", "love"]):
             return "joy", 0.8
-        elif any(word in text for word in ["sad", "down", "upset", "depressed", "miserable", "unhappy"]):
-            return "sadness", 0.7
         elif any(word in text for word in ["angry", "mad", "frustrated", "annoyed", "irritated"]):
             return "anger", 0.7
         elif any(word in text for word in ["afraid", "scared", "nervous", "anxious", "worried", "terrified"]):
@@ -867,7 +900,7 @@ class MovieDatabase:
             {
                 "title": "Get Out",
                 "genre": "horror",
-                "description": "A young African-American visits his white girlfriend's parents for the weekend, where his simmering uneasiness about their reception of him eventually reaches a boiling point.",
+                "description": "A young African-American visits his white girlfriend's parents for the weekend, where his simmering unease about their reception of him eventually reaches a boiling point.",
                 "emotions": ["fear", "surprise"]
             },
             {
@@ -953,6 +986,39 @@ class MovieDatabase:
             matching = [m for m in self.movies if m["title"] not in exclude_titles]
             
         # If still no matches, return any movie
+        if not matching:
+            matching = self.movies
+            
+        return random.choice(matching)
+
+    def get_movie_by_genre_and_emotion(self, genre: str, emotion: str, exclude_titles: List[str] = None) -> Dict[str, Any]:
+        """Get a movie matching both genre and emotion for better personalization"""
+        if exclude_titles is None:
+            exclude_titles = []
+            
+        # Try to find movies matching both genre and emotion
+        matching = [m for m in self.movies 
+                   if m["genre"] == genre.lower() and 
+                      emotion in m["emotions"] and 
+                      m["title"] not in exclude_titles]
+        
+        # If no matches with both, fall back to genre only
+        if not matching:
+            matching = [m for m in self.movies 
+                       if m["genre"] == genre.lower() and 
+                          m["title"] not in exclude_titles]
+        
+        # If still no matches, try emotion only
+        if not matching:
+            matching = [m for m in self.movies 
+                       if emotion in m["emotions"] and 
+                          m["title"] not in exclude_titles]
+        
+        # Final fallback to any movie
+        if not matching:
+            matching = [m for m in self.movies if m["title"] not in exclude_titles]
+            
+        # If absolutely no options, return any movie
         if not matching:
             matching = self.movies
             

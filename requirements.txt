@@ -2,3 +2,12 @@ streamlit==1.16.0
 fastapi==0.95.2
 uvicorn==0.22.0
 requests==2.31.0
+
+# New additions for data integration
+pandas==2.1.4
+torch==2.1.2
+transformers==4.36.2
+scikit-learn==1.3.2
+pymongo==4.6.0
+redis==5.0.1
+implicit==0.7.1

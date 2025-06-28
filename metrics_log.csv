@@ -1,0 +1,6 @@
+timestamp,user_id,conversation_length,genres_mentioned,emotion_changes,recommendations_given,time_to_recommendation,user_satisfaction
+2025-05-05T21:20:12.205379,user_cn3hpm80k,1,0,0,0,3,0.0
+2025-05-05T21:20:24.686981,user_cn3hpm80k,2,0,1,0,2,0.0
+2025-05-05T21:20:43.609229,user_cn3hpm80k,3,0,1,0,2,0.0
+2025-05-05T21:20:54.171468,user_cn3hpm80k,5,1,1,0,0,0.0
+2025-05-05T21:21:08.028025,user_cn3hpm80k,6,1,1,1,-1,0.0
